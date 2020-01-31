@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="44e7ecbc-88de-41fb-bd01-4b38f6a955ee" basePath="/test">
+		<http:listener-connection host="localhost" port="8082" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="0a5a2d69-39bf-436f-b936-969f07840be5" basePath="/api/timezone/" >
+		<http:request-connection host="worldtimeapi.org" />
+	</http:request-config>
+	<flow name="demo2-re2Flow" doc:id="9d8874e2-1103-4234-8971-6090f1990b34" >
+		<http:listener doc:name="Listener" doc:id="d8b22ce2-6173-4709-8c47-21c3f5bc9b20" config-ref="HTTP_Listener_config" path="{test1}/{test2}"/>
+		<http:request method="GET" doc:name="Request" doc:id="19d951d9-3b89-4bf5-98b3-618cef92da6b" config-ref="HTTP_Request_configuration" path="{conti}/{city}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	conti : attributes.uriParams.test1,
+	city : attributes.uriParams.test2
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="487ed5ef-b177-4235-8bcf-0ca534348b8d" />
+		<ee:transform doc:name="Transform Message" doc:id="ff73fe56-8eab-47b3-abfe-df93e19afd43" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"message":payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="48326ac4-5beb-434b-abac-2dfe1121bf75" />
+	</flow>
+</mule>
